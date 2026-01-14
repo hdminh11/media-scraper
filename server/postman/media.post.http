@@ -1,0 +1,9 @@
+@url_dev=http://localhost:3000
+
+### Scrape Media from URL
+POST {{url_dev}}/media/ingest
+Content-Type: application/json
+
+{
+    "urls": ["https://www.youtube.com/watch?v=0O1PlClhmIc&list=PLw0w5s5b9NK4ucXizOF-eKAXKvn9ruCw8"]
+}
