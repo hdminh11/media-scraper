@@ -7,4 +7,6 @@ const router = express.Router();
 
 router.post('/ingest', asyncHandler(mediaController.ingest));
 
+router.get('/getAll', asyncHandler(mediaController.getAllMedia));
+
 module.exports = router;

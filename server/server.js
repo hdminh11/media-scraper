@@ -1,9 +1,44 @@
 'use strict';
 
 const app = require('./src/app');
+const { initializeQueue, closeQueue } = require('./queue');
 
 const PORT = process.env.PORT || '3000';
 
-const server = app.listen(PORT,() => {
-    console.log(`Server is running on port ${PORT}`);
-})
+let server;
+
+const startServer = async () => {
+    try {
+        // Initialize queue system
+        await initializeQueue();
+        console.log('✅ Queue system started');
+
+        // Start Express server
+        server = app.listen(PORT, () => {
+            console.log(`🚀 Server is running on port ${PORT}`);
+        });
+
+        // Graceful shutdown
+        process.on('SIGTERM', async () => {
+            console.log('SIGTERM received, shutting down gracefully...');
+            server.close(async () => {
+                await closeQueue();
+                process.exit(0);
+            });
+        });
+
+        process.on('SIGINT', async () => {
+            console.log('\nSIGINT received, shutting down gracefully...');
+            server.close(async () => {
+                await closeQueue();
+                process.exit(0);
+            });
+        });
+
+    } catch (error) {
+        console.error('Failed to start server:', error.message);
+        process.exit(1);
+    }
+};
+
+startServer();

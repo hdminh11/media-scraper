@@ -1,7 +1,13 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 const { resolveUrl, isVideoEmbed } = require('../utils');
+const MediaModel = require('../model/media.model');
 
+/**
+ * Scrape media (images and videos) from a given URL
+ * @param {String} url - The URL of the page to scrape
+ * @returns {Promise<Array>} Array of media objects with {type, src, url, name?}
+ */
 const scrapeMedia = async (url) => {
     const response = await axios.get(url, {
         headers: {
@@ -22,7 +28,8 @@ const scrapeMedia = async (url) => {
             media.push({
                 type: 'image',
                 src: resolveUrl(src, url),
-                name: alt
+                name: alt,
+                url: url,
             });
         }
     });
@@ -35,6 +42,7 @@ const scrapeMedia = async (url) => {
             media.push({
                 type: 'video',
                 src: resolveUrl(src, url),
+                url: url,
             });
         }
     });
@@ -47,6 +55,7 @@ const scrapeMedia = async (url) => {
             media.push({
                 type: 'video',
                 src: resolveUrl(src, url),
+                url: url,
             });
         }
     });
@@ -59,8 +68,8 @@ const scrapeMedia = async (url) => {
         if (src && isVideoEmbed(src)) {
             media.push({
                 src: src,
-                title: title,
-                name: 'video',
+                type: 'video',
+                url: url,
             });
         }
     });
@@ -68,6 +77,26 @@ const scrapeMedia = async (url) => {
     return media;
 };
 
+/**
+ * Filter out duplicate media that already exist in database
+ * @param {Array} mediaArray - Array of media objects
+ * @param {String} url - Page URL
+ * @returns {Promise<Array>} Filtered array with only new media
+ */
+filterNewMedia = async (mediaArray, url) => {
+    const newMedia = [];
+
+    for (const media of mediaArray) {
+        const exists = await MediaModel.checkMediaExists(media.src, url);
+        if (!exists) {
+            newMedia.push(media);
+        }
+    }
+
+    return newMedia;
+};
+
 module.exports = {
     scrapeMedia,
+    filterNewMedia,
 }

@@ -1,8 +1,10 @@
 'use strict';
 
 
+const { getAllMedia } = require("../controllers/media.controller");
 const { BadRequestError } = require("../core/error.response");
-const { scrapeMedia } = require("../helpers/media.scrape");
+const { scrapeMedia, filterNewMedia } = require("../helpers/media.scrape");
+const MediaModel = require("../model/media.model");
 
 class MediaService {
     ingest = async ({ urls }) => {
@@ -14,12 +16,25 @@ class MediaService {
 
         for (const url of urls) {
             try {
-                const media = await scrapeMedia(url);
+                const scrapedMedia = await scrapeMedia(url);
+                
+                // Filter out duplicates that already exist in database
+                const newMedia = await filterNewMedia(scrapedMedia, url);
+                
                 results.push({
                     url,
                     success: true,
-                    media
+                    media: scrapedMedia,
+                    newMedia: newMedia,
+                    duplicates: scrapedMedia.length - newMedia.length,
+                    saved: newMedia.length
                 });
+
+                // Save only new media to database
+                if (newMedia.length > 0) {
+                    MediaModel.createMany(newMedia)
+                        .catch(err => console.error(`Failed to save media for ${url}:`, err));
+                }
             } catch (error) {
                 results.push({
                     url,
@@ -30,6 +45,30 @@ class MediaService {
         }
 
         return results;
+    }
+
+    getAllMedia = async ({ searchText, page = 1, limit = 20, type }) => {
+        const skip = (page - 1) * limit;
+
+        const where = searchText ? {
+            OR: [
+                { src: { contains: searchText, mode: 'insensitive' } },
+                { url: { contains: searchText, mode: 'insensitive' } },
+                { name: { contains: searchText, mode: 'insensitive' } },
+            ]
+        } : {};
+
+        if (type) {
+            where.type = type;
+        }
+
+        const mediaRecords = await MediaModel.findAll({
+            skip,
+            take: limit,
+            where
+        });
+        
+        return mediaRecords;
     }
 }
 
