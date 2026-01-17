@@ -22,7 +22,7 @@ services:
     restart: unless-stopped
 
   backend:
-    build: ./server
+    image: hoangducminh/media-scraper-backend:v1
     container_name: media-backend
     environment:
       PORT: 3000
@@ -46,10 +46,7 @@ services:
           memory: 512M
 
   frontend:
-    build:
-      context: ./client
-      args:
-        VITE_API_URL: http://localhost:3000
+    image: hoangducminh/media-scraper-frontend:v1
     container_name: media-frontend
     ports:
       - "4173:80"
