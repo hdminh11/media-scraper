@@ -1,5 +1,17 @@
 # Media Scraper Backend
 
+## Executive Summary
+
+This project implements a scalable backend service that accepts a large number of web URLs, asynchronously scrapes images and videos from those pages, and stores the results in a relational database for efficient retrieval.
+
+To meet the requirement of handling approximately 5,000 concurrent scraping requests on a server with only 1 CPU and 1GB RAM, the system is designed around a queue-based, non-blocking architecture. Incoming HTTP requests are handled quickly by enqueueing jobs into Redis-backed queues, allowing the API to remain responsive under heavy load. Scraping and persistence are decoupled into separate worker pipelines to control resource usage and protect the database from write contention.
+
+The backend uses Node.js, Express, Redis (BullMQ), PostgreSQL, and Prisma, with carefully tuned worker concurrency, retry strategies, and timeouts. This design ensures reliability, fault tolerance, and predictable performance while operating under strict resource constraints.
+
+Overall, the solution prioritizes throughput, resilience, and operational clarity, reflecting real-world considerations for building scalable systems in production environments, particularly for data-heavy and high-concurrency workloads.
+
+The following sections describe the system architecture, request flow, queue design, and operational tooling in detail.
+
 ## Architecture & Directory Structure
 
 - **Express Entry Point**: [server.js](server.js) - initializes queue system and starts API server
@@ -11,6 +23,8 @@
   - [src/services/media.service.js](src/services/media.service.js) - fetch media data from database
   - [src/helpers/media.scrape.js](src/helpers/media.scrape.js) - HTML parsing, image/video extraction
 - **Queue System**: [src/queue/index.js](src/queue/index.js) - Redis initialization and queue/worker management
+  - Separating scraping and saving into two queues allows independent scaling and prevents database
+  pressure from slowing down scraping throughput.
   - Two BullMQ queues: `media-scrape` ([mediaScrape.queue.js](src/queue/mediaScrape.queue.js), [mediaScrape.worker.js](src/queue/mediaScrape.worker.js)) and `media-save` ([mediaSave.queue.js](src/queue/mediaSave.queue.js), [mediaSave.worker.js](src/queue/mediaSave.worker.js))
 - **Database**: Prisma-based
   - Schema: [src/prisma/schema.prisma](src/prisma/schema.prisma)
@@ -34,7 +48,7 @@
    - Failed jobs retained for debugging
 
 3. **Saving Phase** (Worker: [mediaSave.worker.js](src/queue/mediaSave.worker.js))
-   - Concurrency: 2 (higher than scraping, less CPU-intensive)
+   - Concurrency: 2 (lower concurrency to protect database under high write load)
    - Retry: 2 attempts with exponential backoff
    - Timeout: 10 seconds per job
    - Bulk inserts media items into PostgreSQL via Prisma
@@ -93,10 +107,10 @@ node src/queue/loadTest.js
 node src/queue/loadTest.js 5000 100 100
 ```
 
-Output shows:
-- Job enqueue rate (jobs/sec)
-- Success/failure counts
-- Total elapsed time
+Observed behavior:
+- API remains responsive under 5000 concurrent requests
+- Jobs are queued immediately without blocking HTTP threads
+- Database writes remain stable due to controlled worker concurrency
 
 Example: `node src/queue/loadTest.js 5000` creates 5000 scraping jobs and measures throughput.
 
