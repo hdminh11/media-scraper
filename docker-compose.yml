@@ -21,5 +21,41 @@ services:
       - "6379:6379"
     restart: unless-stopped
 
+  backend:
+    build: ./server
+    container_name: media-backend
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://admin:admin@postgres:5432/media?schema=public
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CORS_ORIGIN: http://localhost:4173
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  frontend:
+    build:
+      context: ./client
+      args:
+        VITE_API_URL: http://localhost:3000
+    container_name: media-frontend
+    ports:
+      - "4173:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
 volumes:
   postgres_data:

@@ -5,7 +5,7 @@ const { addScrapingJob } = require('./mediaScrape.queue');
 const generateMockUrls = (count) => {
     const urls = [];
     for (let i = 0; i < count; i++) {
-        urls.push(`https://example.com/page/${i}`);
+        urls.push(`https://tuoitre.vn/thoi-su/trang-${i + 1}.htm`);
     }
     return urls;
 };
@@ -61,13 +61,27 @@ module.exports = {
 // Run if executed directly
 if (require.main === module) {
     require('dotenv').config();
-    runLoadTest(5000, 100, 50)
+    
+    // Parse command line arguments
+    const args = process.argv.slice(2);
+    const totalJobs = parseInt(args[0]) || 100;
+    const batchSize = parseInt(args[1]) || 50;
+    const delayBetweenBatches = parseInt(args[2]) || 100;
+    
+    console.log('📋 Load Test Configuration:');
+    console.log(`   Total Jobs: ${totalJobs}`);
+    console.log(`   Batch Size: ${batchSize}`);
+    console.log(`   Delay Between Batches: ${delayBetweenBatches}ms`);
+    console.log('');
+    
+    runLoadTest(totalJobs, batchSize, delayBetweenBatches)
         .then(() => {
-            console.log('✅ Load test completed');
+            console.log('\n✅ Load test completed successfully');
             process.exit(0);
         })
         .catch(err => {
-            console.error('❌ Load test failed:', err.message);
+            console.error('\n❌ Load test failed:', err.message);
+            console.error(err.stack);
             process.exit(1);
         });
 }

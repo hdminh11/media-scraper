@@ -2,7 +2,9 @@
 
 const redisConnection = require('./redis.connection');
 const { mediaScrapeQueue, addScrapingJob } = require('./mediaScrape.queue');
+const { mediaSaveQueue, addSaveJob } = require('./mediaSave.queue');
 const mediaScrapeWorker = require('./mediaScrape.worker');
+const mediaSaveWorker = require('./mediaSave.worker');
 
 const initializeQueue = async () => {
     try {
@@ -16,9 +18,12 @@ const initializeQueue = async () => {
         }
         console.log('✅ Queue system initialized');
         return {
-            queue: mediaScrapeQueue,
-            worker: mediaScrapeWorker,
+            scrapeQueue: mediaScrapeQueue,
+            saveQueue: mediaSaveQueue,
+            scrapeWorker: mediaScrapeWorker,
+            saveWorker: mediaSaveWorker,
             addJob: addScrapingJob,
+            addSaveJob: addSaveJob,
         };
     } catch (error) {
         console.error('Failed to initialize queue system:', error && error.message ? error.message : error);
@@ -29,7 +34,9 @@ const initializeQueue = async () => {
 const closeQueue = async () => {
     try {
         await mediaScrapeWorker.close();
+        await mediaSaveWorker.close();
         await mediaScrapeQueue.close();
+        await mediaSaveQueue.close();
         await redisConnection.quit();
         console.log('✅ Queue system closed');
     } catch (error) {
@@ -41,6 +48,9 @@ module.exports = {
     initializeQueue,
     closeQueue,
     mediaScrapeQueue,
+    mediaSaveQueue,
     addScrapingJob,
+    addSaveJob,
     mediaScrapeWorker,
+    mediaSaveWorker,
 };

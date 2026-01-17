@@ -1,8 +1,9 @@
 'use strict';
 
 const { SuccessResponse } = require("../core/success.response");
-const mediaService = require("../services/media.service");
+
 const { addScrapingJob } = require("../queue");
+const mediaService = require("../services/media.service");
 
 class MediaController {
     /**
@@ -11,7 +12,7 @@ class MediaController {
      */
     ingest = async (req, res, next) => {
         const urls = req.body.urls;
-        
+
         if (!urls || !Array.isArray(urls) || urls.length === 0) {
             return new SuccessResponse({
                 message: 'Invalid URLs array',
@@ -43,13 +44,15 @@ class MediaController {
 
     getAllMedia = async (req, res, next) => {
         const { searchText, page, pageSize, type } = req.query;
+        const result = await mediaService.getAllMedia({
+            searchText,
+            page: parseInt(page) || 1,
+            limit: parseInt(pageSize) || 20,
+            type
+        });
+
         new SuccessResponse({
-            metadata: await mediaService.getAllMedia({ 
-                searchText, 
-                page: parseInt(page) || 1, 
-                limit: parseInt(pageSize) || 20, 
-                type 
-            })
+            metadata: result,
         }).send(res);
     }
 }

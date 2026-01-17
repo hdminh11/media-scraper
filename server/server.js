@@ -1,7 +1,7 @@
 'use strict';
 
 const app = require('./src/app');
-const { initializeQueue, closeQueue } = require('./queue');
+const { initializeQueue, closeQueue } = require('./src/queue');
 
 const PORT = process.env.PORT || '3000';
 
@@ -21,14 +21,6 @@ const startServer = async () => {
         // Graceful shutdown
         process.on('SIGTERM', async () => {
             console.log('SIGTERM received, shutting down gracefully...');
-            server.close(async () => {
-                await closeQueue();
-                process.exit(0);
-            });
-        });
-
-        process.on('SIGINT', async () => {
-            console.log('\nSIGINT received, shutting down gracefully...');
             server.close(async () => {
                 await closeQueue();
                 process.exit(0);

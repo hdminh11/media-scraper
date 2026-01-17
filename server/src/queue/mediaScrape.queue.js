@@ -13,7 +13,7 @@ const mediaScrapeQueue = new Queue('media-scrape', {
             delay: 2000,
         },
         timeout: 8000,
-        removeOnComplete: true, // Save space by removing completed jobs
+        removeOnComplete: { count: 1000 }, // Keep last 1000 completed jobs
         removeOnFail: false, // Keep failed jobs for debugging
     },
 });
