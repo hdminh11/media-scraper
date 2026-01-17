@@ -22,7 +22,7 @@ services:
     restart: unless-stopped
 
   backend:
-    image: hoangducminh/media-scraper-backend:v1
+    image: hoangducminh/media-scraper-backend
     container_name: media-backend
     environment:
       PORT: 3000
@@ -46,7 +46,7 @@ services:
           memory: 512M
 
   frontend:
-    image: hoangducminh/media-scraper-frontend:v1
+    image: hoangducminh/media-scraper-frontend
     container_name: media-frontend
     ports:
       - "4173:80"

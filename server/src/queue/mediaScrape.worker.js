@@ -2,7 +2,7 @@
 
 const { Worker } = require('bullmq');
 const redisConnection = require('./redis.connection');
-const { scrapeMedia, filterNewMedia } = require('../helpers/media.scrape');
+const { scrapeMedia, filterNewMedia } = require('../helpers/media-scrape.handler');
 const { addSaveJob } = require('./mediaSave.queue');
 
 const scrapePage = async (url) => {

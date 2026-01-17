@@ -1,16 +1,107 @@
-# React + Vite
+# Media Scraper - Frontend Client
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern React frontend for the Media Scraper application. This client provides an intuitive interface for ingesting media URLs, browsing scraped media content, and managing media collections.
 
-Currently, two official plugins are available:
+## 🚀 Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **URL Ingestion**: Submit single or multiple URLs for media scraping (comma-separated)
+- **Media Gallery**: Browse and view all scraped media with pagination
+- **Search & Filter**: Search media by title/source and filter by type (image, video)
+- **Real-time Updates**: Live status updates for ingestion jobs
+- **Responsive Design**: Modern, mobile-friendly interface
+- **Pagination**: Efficient browsing with customizable page sizes
 
-## React Compiler
+## 🛠️ Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **React 19** - Modern UI library with hooks
+- **Vite 7** - Lightning-fast build tool and dev server
+- **ESLint** - Code quality and style enforcement
+- **CSS3** - Custom styling
 
-## Expanding the ESLint configuration
+## 📋 Prerequisites
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- Node.js 18+ and npm/yarn
+- Running backend server (see `/server` directory)
+
+## 🏗️ Installation
+
+```bash
+# Install dependencies
+npm install
+```
+
+## ⚙️ Configuration
+
+Create a `.env` file in the client directory:
+
+```env
+VITE_API_URL=http://localhost:3000
+```
+
+Adjust the API URL to match your backend server address.
+
+## 🚦 Development
+
+```bash
+# Start development server with HMR
+npm run dev
+```
+
+The app will be available at `http://localhost:5173` by default.
+
+## 🏭 Production
+
+```bash
+# Build for production
+npm run build
+
+# Preview production build locally
+npm run preview
+```
+
+The production build will be output to the `dist/` directory.
+
+## 🧹 Code Quality
+
+```bash
+# Run ESLint
+npm run lint
+```
+
+## 🐳 Docker
+
+Build and run with Docker:
+
+```bash
+# Build image
+docker build -t media-scraper-client .
+
+# Run container
+docker run -p 5173:5173 media-scraper-client
+```
+
+Or use the provided `docker-compose.yml` from the project root.
+
+## 📁 Project Structure
+
+```
+client/
+├── public/          # Static assets
+├── src/
+│   ├── assets/      # Images, fonts, etc.
+│   ├── App.jsx      # Main application component
+│   ├── App.css      # Application styles
+│   ├── main.jsx     # Application entry point
+│   └── index.css    # Global styles
+├── index.html       # HTML template
+├── vite.config.js   # Vite configuration
+├── eslint.config.js # ESLint configuration
+└── package.json     # Dependencies and scripts
+```
+
+## 🔌 API Integration
+
+The client communicates with the backend API for:
+
+- `GET /media/getAll` - Fetch paginated media with search and filters
+- `POST /media/ingest` - Submit URLs for scraping
