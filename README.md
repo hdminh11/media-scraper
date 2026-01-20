@@ -51,13 +51,29 @@ Media Scraper is a web application that allows users to:
 git clone https://github.com/hdminh11/media-scraper
 cd media-scraper
 
-# Start all services
+# Start all services (default: localhost)
 docker-compose up -d
 
 # Access the application
 # Frontend: http://localhost:4173
 # Backend API: http://localhost:3000
 ```
+
+**For EC2 Deployment:**
+
+1. Edit `docker-compose.yml` and change `VITE_API_URL`:
+   ```yaml
+   frontend:
+     environment:
+       VITE_API_URL: http://<YOUR_EC2_PUBLIC_IP>:3000  # Change this
+   ```
+
+2. Make sure Security Group allows ports: 3000 (backend), 4173 (frontend)
+
+3. Deploy:
+   ```bash
+   docker-compose up -d
+   ```
 
 #### Option 2: Manual Setup
 
@@ -124,20 +140,29 @@ Includes:
 
 ## 🔧 Configuration
 
-Environment configuration for each service:
+All configuration is done directly in `docker-compose.yml`:
 
-**Backend** (`.env` in `server/`):
-```env
-DATABASE_URL=postgresql://admin:admin@localhost:1211/media
-REDIS_HOST=localhost
-REDIS_PORT=6379
-PORT=3000
+**Frontend API URL:**
+```yaml
+frontend:
+  environment:
+    VITE_API_URL: http://localhost:3000  # Change for EC2: http://<EC2_IP>:3000
 ```
 
-**Frontend** (`.env` in `client/`):
-```env
-VITE_API_URL=http://localhost:3000
+**Backend:**
+```yaml
+backend:
+  environment:
+    PORT: 3000
+    DATABASE_URL: postgresql://admin:admin@postgres:5432/media
+    REDIS_HOST: redis
+    REDIS_PORT: 6379
+    CORS_ORIGIN: "*"  # Allow all origins
 ```
+
+**For manual setup** (without Docker), create `.env` files:
+- Backend (`.env` in `server/`): `DATABASE_URL`, `REDIS_HOST`, etc.
+- Frontend (`.env` in `client/`): `VITE_API_URL=http://localhost:3000`
 
 ## 📊 Performance
 
@@ -167,8 +192,8 @@ npm run lint         # Code linting
 ## 🐳 Docker Images
 
 Production images published on Docker Hub:
-- Backend: `hoangducminh/media-scraper-backend:v1`
-- Frontend: `hoangducminh/media-scraper-frontend:v1`
+- Backend: `hoangducminh/media-scraper-backend:latest`
+- Frontend: `hoangducminh/media-scraper-frontend:latest`
 
 ## 📝 API Endpoints
 
