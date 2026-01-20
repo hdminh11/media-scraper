@@ -29,7 +29,7 @@ services:
       DATABASE_URL: postgresql://admin:admin@postgres:5432/media?schema=public
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      CORS_ORIGIN: http://localhost:4173
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
     ports:
       - "3000:3000"
     depends_on:
@@ -48,6 +48,8 @@ services:
   frontend:
     image: hoangducminh/media-scraper-frontend
     container_name: media-frontend
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
     ports:
       - "4173:80"
     depends_on:
